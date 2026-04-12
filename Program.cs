@@ -37,6 +37,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
