@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+using JobTracker.Data;
+using JobTracker.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using JobTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
+
+builder.Services.AddScoped<IJobService, JobService>();
 
 var app = builder.Build();
 
