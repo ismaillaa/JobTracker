@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using JobTracker.Data;
 using JobTracker.Models;
+using JobTracker.DTOs;
 
 namespace JobTracker.Controllers;
 
@@ -19,7 +20,18 @@ public class JobsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var jobs = await _context.Jobs.ToListAsync();
+        var jobs = await _context.Jobs
+            .Select(j => new JobResponseDto
+            {
+                Id = j.Id,
+                Company = j.Company,
+                Position = j.Position,
+                Status = j.Status,
+                AppliedAt = j.AppliedAt,
+                Notes = j.Notes
+            })
+            .ToListAsync();
+
         return Ok(jobs);
     }
 
@@ -28,15 +40,45 @@ public class JobsController : ControllerBase
     {
         var job = await _context.Jobs.FindAsync(id);
         if (job == null) return NotFound();
-        return Ok(job);
+
+        var dto = new JobResponseDto
+        {
+            Id = job.Id,
+            Company = job.Company,
+            Position = job.Position,
+            Status = job.Status,
+            AppliedAt = job.AppliedAt,
+            Notes = job.Notes
+        };
+
+        return Ok(dto);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Job job)
+    public async Task<IActionResult> Create(CreateJobDto dto)
     {
+        var job = new Job
+        {
+            Company = dto.Company,
+            Position = dto.Position,
+            Status = dto.Status,
+            Notes = dto.Notes
+        };
+
         _context.Jobs.Add(job);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
+
+        var response = new JobResponseDto
+        {
+            Id = job.Id,
+            Company = job.Company,
+            Position = job.Position,
+            Status = job.Status,
+            AppliedAt = job.AppliedAt,
+            Notes = job.Notes
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = job.Id }, response);
     }
 
     [HttpDelete("{id}")]
