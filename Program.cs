@@ -12,17 +12,25 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-string connectionString;
+var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 
+Console.WriteLine($"DATABASE_URL is null: {databaseUrl == null}");
+Console.WriteLine($"ConnStr is null: {connStr == null}");
+
+string connectionString;
 if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgresql://"))
 {
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
     connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
 }
+else if (!string.IsNullOrEmpty(connStr))
+{
+    connectionString = connStr;
+}
 else
 {
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+    throw new Exception("No database connection string found. Set DATABASE_URL or ConnectionStrings__DefaultConnection.");
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -15,4 +15,5 @@ RUN dotnet publish -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN rm -f appsettings.json appsettings.Development.json
 ENTRYPOINT ["dotnet", "JobTracker.dll"]
